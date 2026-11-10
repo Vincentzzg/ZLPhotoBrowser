@@ -188,7 +188,13 @@ public class ZLPhotoPicker: NSObject {
             self.cancel()
         }
         
-        sender.showDetailViewController(nav, sender: nil)
+        if ZLPhotoConfiguration.default().afterTakePhotoDidPreview {
+            UIView.performWithoutAnimation {
+                sender.showDetailViewController(nav, sender: nil)
+            }
+        } else {
+            sender.showDetailViewController(nav, sender: nil)
+        }
     }
     
     private func getImageNav(rootViewController: UIViewController) -> ZLImageNavController {

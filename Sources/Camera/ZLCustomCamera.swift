@@ -1430,26 +1430,24 @@ extension ZLCustomCamera: @preconcurrency AVCapturePhotoCaptureDelegate {
             
             if config.afterTakePhotoDidPreview {
                 if let image = self.takedImage {
-                    ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] error, asset in
-                        if let asset = asset {
-                            let ac = ZLPhotoPreviewSheet()
-                            
-                            ac.selectImageBlock = { [weak self] results, isOriginal in
-                                guard let `self` = self else { return }
-                                
-                                if let model = results.first {
-                                    self.getPhotoModelBlock?(model, isOriginal);
-                                }
-                                self.dismiss(animated: true)
-                            }
-                            ac.cancelBlock = { [weak self] in
-                                self?.retakeBtnClick()
-                            }
-                            
-                            ac.previewAssets(sender: self!, assets: [asset], index: 0, isOriginal: true, showBottomViewAndSelectBtn: true)
-                        } else {
+                    ZLPhotoManager.saveImageToAlbum(image: image) { error, asset in
+                        guard let asset else {
                             debugPrint("保存图片到相册失败")
+                            return
                         }
+                        let picker = ZLPhotoPicker()
+
+                        picker.selectImageBlock = { results, isOriginal in
+                            if let model = results.first {
+                                self.getPhotoModelBlock?(model, isOriginal)
+                            }
+                            self.dismiss(animated: true)
+                        }
+                        picker.cancelBlock = {
+                            self.retakeBtnClick()
+                        }
+
+                        picker.previewAssets(sender: self, assets: [asset], index: 0, isOriginal: true, showBottomViewAndSelectBtn: true)
                     }
                 }
             } else {

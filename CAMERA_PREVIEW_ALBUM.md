@@ -53,3 +53,30 @@ Do not edit the integrating app's Carthage/Checkouts copy; update its generated 
 6. Performance: reuses the image and preview cell; byte size comes from captured data, avoiding a second JPEG encoding.
 
 Build status (2026-11-10): final device and simulator archives both succeeded with Xcode 27 / iOS 15 minimum. Functional checks above remain pending manual verification.
+
+
+## Runtime diagnostic build camdiag-20261110a (pending user logs)
+
+The user confirmed saveToAlbum=false does not persist photos, but editing/finishing can leave ZLCustomCamera visible without controls.
+The screenshot identifies the exposed camera controller; it does not prove an iOS 27 compatibility defect.
+This revision adds diagnostics only and does not reorder callbacks or dismiss requests.
+
+Filter Xcode console by `[HikCameraTrace]`. Logs contain controller identities/ownership, transition flags,
+effective save/preview options, and album transaction events; no images, paths, names or asset identifiers.
+The memory-preview entry includes build=camdiag-20261110a to verify the loaded binary.
+
+Reproduce on the same device:
+1. false: shoot → preview → confirm without editing (control case).
+2. false: shoot → preview → edit something → finish (reported issue); wait two seconds when it sticks.
+3. false: edit → cancel editing → confirm; then preview → back → retake.
+4. true (remove any local forced-false override): shoot → wait in preview → confirm. Compare album.save.transaction/completion timestamps with preview appearance and confirmation, since the user observes album visibility only after confirming.
+
+Return the filtered log from manager.cameraEntry through the stuck state / final manager result.
+Key distinctions: editor.callback.beforePreviewCallback → preview.edit.autoDoneDecision → preview.done.entry;
+which controller is presented when camera.previewDismiss.request runs; whether previewDismiss.completion and cameraDismiss.completion fire;
+postcheck ownership at 0.8 seconds. The timer only observes; it never drives dismissal.
+
+Diagnostic static self-check: optional/released controllers are logged safely; all new lifecycle overrides call super;
+closures use weak controller references; no new file storage, shared mutable state, UI mutation or per-frame logging.
+Both framework archives and host build must pass before handing over. Functional resolution remains pending runtime logs.
+Temporary logs will be removed or made switchable after the user confirms the fix.

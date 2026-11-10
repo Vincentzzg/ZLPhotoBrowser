@@ -344,6 +344,7 @@ open class ZLCustomCamera: UIViewController {
     
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        zl_cameraTrace("camera.viewDidAppear", self)
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
             showAlertAndDismissAfterDoneAction(message: localLanguageTextValue(.cameraUnavailable), type: .camera)
         } else if !cameraConfig.allowTakePhoto, !cameraConfig.allowRecordVideo {
@@ -369,6 +370,7 @@ open class ZLCustomCamera: UIViewController {
     
     override open func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        zl_cameraTrace("camera.viewDidDisappear", self)
         guard session.isRunning else { return }
         
         sessionQueue.async {
@@ -1410,6 +1412,7 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
     }
     
     private func previewCameraPhoto(_ image: UIImage, byteCount: Int) {
+        zl_cameraTrace("camera.memoryPreview.entry", self, "build=camdiag-20261110a saveToAlbum=\(saveToAlbum)")
         let preview = ZLPhotoPreviewController(cameraImage: image, byteCount: byteCount)
         let nav = ZLImageNavController(rootViewController: preview)
         nav.isSelectedOriginal = true
@@ -1417,12 +1420,24 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
             self?.retakeBtnClick()
         }
         preview.cameraPhotoDoneBlock = { [weak self, weak nav] image, isOriginal in
+            zl_cameraTrace("camera.memoryResult.entry", self, "hasImage=\(image != nil) original=\(isOriginal) hasNav=\(nav != nil)")
+            zl_cameraTrace("camera.previewDismiss.request", nav)
             nav?.dismiss(animated: true) { [weak self] in
-                guard let self = self else { return }
+                zl_cameraTrace("camera.previewDismiss.completion", self)
+                guard let self = self else {
+                    zl_cameraTrace("camera.memoryResult.cameraReleased")
+                    return
+                }
                 let completion = self.photoPreviewDoneBlock
+                zl_cameraTrace("camera.cameraDismiss.request", self, "hasCallback=\(completion != nil)")
                 self.dismiss(animated: true) {
+                    zl_cameraTrace("camera.cameraDismiss.completion")
                     completion?(image, isOriginal)
                 }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self, weak nav] in
+                zl_cameraTrace("camera.dismiss.postcheck", self)
+                zl_cameraTrace("camera.previewDismiss.postcheck", nav)
             }
         }
         UIView.performWithoutAnimation {
@@ -1432,6 +1447,7 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
 
     private func handlePhotoOutputData(_ data: Data?, isError: Bool) {
         ZLMainAsync {
+            zl_cameraTrace("camera.photoOutput.entry", self, "build=camdiag-20261110a saveToAlbum=\(self.saveToAlbum) preview=\(ZLPhotoConfiguration.default().afterTakePhotoDidPreview) hasData=\(data != nil) error=\(isError)")
             defer {
                 self.isTakingPicture = false
                 self.isCapturePending = false
@@ -1460,7 +1476,9 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
                         self.previewCameraPhoto(image, byteCount: data.count)
                         return
                     }
+                    zl_cameraTrace("camera.assetSave.request", self)
                     ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] error, asset in
+                        zl_cameraTrace("camera.assetSave.result", self, "hasAsset=\(asset != nil) error=\(error != nil)")
                         if let asset = asset {
                             let ac = ZLPhotoPreviewSheet()
                             

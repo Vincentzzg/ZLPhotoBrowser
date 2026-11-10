@@ -39,14 +39,17 @@ public class ZLPhotoManager: NSObject {
     }
     
     private class func saveImageObjToAlbum(obj: AnyObject, completion: ((Error?, PHAsset?) -> Void)?) {
+        zl_cameraTrace("album.save.entry")
         let status = PHPhotoLibrary.zl.authStatus(for: .addOnly)
         if status == .denied || status == .restricted {
+            zl_cameraTrace("album.save.denied")
             completion?(NSError.noWriteAuthError, nil)
             return
         }
         
         var placeholderAsset: PHObjectPlaceholder?
         let completionHandler: ((Bool, Error?) -> Void) = { suc, error in
+            zl_cameraTrace("album.save.completion", nil, "success=\(suc) error=\(error != nil)")
             if suc, error == nil {
                 let asset = self.getAsset(from: placeholderAsset?.localIdentifier)
                 ZLMainAsync {
@@ -62,18 +65,21 @@ public class ZLPhotoManager: NSObject {
         if let image = obj as? UIImage {
             if image.zl.hasAlphaChannel(), let data = image.pngData() {
                 PHPhotoLibrary.shared().performChanges({
+                    zl_cameraTrace("album.save.transaction")
                     let newAssetRequest = PHAssetCreationRequest.forAsset()
                     newAssetRequest.addResource(with: .photo, data: data, options: nil)
                     placeholderAsset = newAssetRequest.placeholderForCreatedAsset
                 }, completionHandler: completionHandler)
             } else {
                 PHPhotoLibrary.shared().performChanges({
+                    zl_cameraTrace("album.save.transaction")
                     let newAssetRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
                     placeholderAsset = newAssetRequest.placeholderForCreatedAsset
                 }, completionHandler: completionHandler)
             }
         } else if let data = obj as? Data {
             PHPhotoLibrary.shared().performChanges({
+                zl_cameraTrace("album.save.transaction")
                 let newAssetRequest = PHAssetCreationRequest.forAsset()
                 newAssetRequest.addResource(with: .photo, data: data, options: nil)
                 placeholderAsset = newAssetRequest.placeholderForCreatedAsset

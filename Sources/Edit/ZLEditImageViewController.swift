@@ -425,6 +425,11 @@ open class ZLEditImageViewController: UIViewController {
         deviceIsiPhone() ? .portrait : .all
     }
     
+    override public func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        zl_cameraTrace("editor.viewDidDisappear", self)
+    }
+
     deinit {
         cleanToolViewStateTimer()
         zl_debugPrint("ZLEditImageViewController deinit")
@@ -539,6 +544,7 @@ open class ZLEditImageViewController: UIViewController {
     
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        zl_cameraTrace("editor.viewDidAppear", self)
         
         guard tools.contains(.draw) else { return }
         
@@ -1134,6 +1140,7 @@ open class ZLEditImageViewController: UIViewController {
     }
     
     @objc private func doneBtnClick() {
+        zl_cameraTrace("editor.done.entry", self)
         var stickerStates: [ZLBaseStickertState] = []
         for view in stickersContainer.subviews {
             guard let view = view as? ZLBaseStickerView else { continue }
@@ -1155,15 +1162,25 @@ open class ZLEditImageViewController: UIViewController {
         var editModel: ZLEditImageModel?
         
         func callback() {
+            zl_cameraTrace("editor.callback.entry", self, "hasEdit=\(hasEdit) hasCallback=\(editFinishBlock != nil)")
             // 内部自己调用，先回调在退出
             if let nav = presentingViewController as? ZLImageNavController,
                nav.topViewController is ZLPhotoPreviewController {
+                zl_cameraTrace("editor.callback.beforePreviewCallback", self)
                 editFinishBlock?(resImage, editModel)
-                dismiss(animated: animate)
+                zl_cameraTrace("editor.callback.afterPreviewCallback", self)
+                dismiss(animated: animate) { [weak self] in
+                    zl_cameraTrace("editor.dismiss.completion", self)
+                }
             } else {
+                zl_cameraTrace("editor.dismiss.beforeCallback", self)
                 dismiss(animated: animate) {
+                    zl_cameraTrace("editor.dismiss.completionThenCallback", self)
                     self.editFinishBlock?(resImage, editModel)
                 }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+                zl_cameraTrace("editor.dismiss.postcheck", self)
             }
         }
         

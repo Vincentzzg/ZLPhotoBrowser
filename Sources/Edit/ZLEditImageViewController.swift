@@ -1213,9 +1213,11 @@ open class ZLEditImageViewController: UIViewController {
         var editModel: ZLEditImageModel?
         
         func callback() {
-            // 内部自己调用，先回调在退出
+            // Keep the asset-preview order. In-memory camera results must follow editor dismissal,
+            // otherwise their synchronous completion dismisses the editor instead of the preview.
             if let nav = presentingViewController as? ZLImageNavController,
-               nav.topViewController is ZLPhotoPreviewController {
+               let preview = nav.topViewController as? ZLPhotoPreviewController,
+               !preview.isInMemoryCameraPreview {
                 editFinishBlock?(resImage, editModel)
                 dismiss(animated: animate)
             } else {

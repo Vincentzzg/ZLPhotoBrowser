@@ -1,108 +1,70 @@
-# Camera preview without album persistence
+# Camera preview and final confirmation
 
-Based on `0be60ebf164a0861cac642e73f769e884abaa689`, matching the integrating app's pinned dependency.
+## Source API
 
-`ZLCustomCamera.saveToAlbum` defaults to `true`, preserving the PHAsset preview path.
-When `ZLPhotoConfiguration.default().afterTakePhotoDidPreview` is true and `saveToAlbum` is false,
-the same `ZLPhotoPreviewController` displays the in-memory photo using the existing local-image cell.
-Back retakes the photo; editing, original selection, zoom and confirmation remain available.
-The result is delivered through `photoPreviewDoneBlock(image, isOriginal)` after both controllers dismiss.
-An empty selection returns a nil image. Direct-edit camera usage is unaffected.
+Based on 0be60ebf164a0861cac642e73f769e884abaa689, matching the integrating app's original dependency.
 
-No PHAsset is created, no photo-library request is made, and no temporary disk image is needed in memory mode.
-The original image byte count is retained for the original-size label. No camera changes are global configuration.
+ZLCustomCamera.saveToAlbum defaults to true for legacy consumers: the PHAsset preview path creates an album asset before preview.
+When afterTakePhotoDidPreview is true and saveToAlbum is false, the original ZLPhotoPreviewController instead previews an in-memory image.
+It retains editing, original selection, zoom, confirmation and back-to-retake. The result arrives through photoPreviewDoneBlock after
+both preview and camera dismiss. Direct-edit camera usage is unaffected.
 
-## Manual verification (pending)
+## HikMoa JSAPI persistence contract
 
-- Compare true/false: identical preview controls; false creates no album entry, including after editing and retaking.
-- With album access denied, false still previews, edits and returns a photo.
-- Toggle original on/off; confirm isOriginal and image data match the user's choice.
-- Edit, cancel editing, edit again, confirm: editor state and final image are retained.
-- Deselect and confirm: nil result; tap confirm twice: one completion.
-- Back from preview, retake, then cancel camera: no image is persisted and cancellation occurs once.
-- Rotate and resize: image zoom and toolbar layout follow the container.
-- Regress default/true PHAsset preview and afterTakePhotoDidPreview == false (chat direct editing).
+HikFunc_CaptureCamera has a separate optional JSAPI saveToAlbum argument (default true).
+The JSAPI now always sets the picker/source option to false to avoid creating a PHAsset merely to preview.
+Only its final confirmed-image handler decides whether to save to Photos:
+
+- Before final confirmation: neither true nor false creates an album asset; cancel/retake writes nothing.
+- Confirmation: true saves one final edited image; false skips persistence. The current single-selection editor may auto-confirm on Done.
+- The original checkbox controls H5 return quality, not which edited image is saved.
+- captureCameraMe and the chat's direct-edit path are unchanged.
+
+This avoids the legacy pre-preview save and the separate edited-asset save controlled by shared saveNewImageAfterEdit configuration.
+The core editor itself does not save an asset. In-memory preview does not run ZLFetchImageOperation.
+
+## Confirmed dismissal fix
+
+The user confirmed saveToAlbum=false now dismisses normally. Their follow-up trace shows the editor first dismissing,
+then a preview dismiss request with no presented editor, then a camera dismiss request with no presented preview;
+final camera completion has attached=false and presenter=nil, followed by one manager result.
+
+Both the full editor and crop-only editor wait for their dismissal before returning a synchronous in-memory preview result.
+Asset preview keeps its legacy callback ordering. No fixed delay or extra dismiss retry is used.
+Temporary lifecycle/ownership logs and their 0.8-second observation timers have now been removed after user confirmation.
+Only the integrating JSAPI's small final-save checkpoints remain while the persistence contract is verified.
+
+## Manual verification (pending unless noted)
+
+- Confirmed by user: false mode does not persist and edited-image completion exits normally.
+- true/default: take a photo, stay in preview, edit or retake/cancel; no album entry before final confirmation.
+- true/default: confirm an edited photo with an obvious mark/crop; Photos contains exactly the final edited result, one image per acceptance.
+- false: edit/confirm returns the image with no album asset. Preview controls and original selection remain available.
+- Editing cancellation, preview back, camera cancel, and crop-only mode preserve their expected state.
+- In the current single-selection flow, editor Done auto-confirms and returns; save=true therefore persists at that acceptance.
+- Regress chat camera editing and captureCameraMe. iPad should return/save its final edited image.
+- Verify the H5 original flag, cache file and optional base64. Album save failure produces a failure callback once.
+
+Filter the host console by [HikCameraTrace]. build=camconfirm-20261110c identifies the final-confirm JSAPI:
+jsapi.present (previewAlbumWrite=0), jsapi.confirmed, then either jsapi.album.skipped or jsapi.album.request/result.
+The request must not precede confirmed. Logs contain flags/error code only, no photo data, paths, names or asset identifiers.
+System Photos UI visibility is a separate observation from the Photos transaction completion; no unsupported timing guarantee is inferred from either.
 
 ## Build
 
-The integrating HikMoa app now requires iOS 15 on both Xcode 26 and Xcode 27.
-The locally built Xcode 27 / iOS 15 xcframework can therefore be used directly.
-The source API still defaults to album persistence for existing consumers.
-
-For each destination (`generic/platform=iOS` and `generic/platform=iOS Simulator`), run:
-
-```sh
-xcodebuild archive -project ZLPhotoBrowser.xcodeproj -scheme ZLPhotoBrowser \
-  -configuration Release -destination 'generic/platform=iOS' \
-  -archivePath /tmp/ZLPhotoBrowser-device.xcarchive \
-  SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-  IPHONEOS_DEPLOYMENT_TARGET=15.0 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-```
-
-Use a separate archive path for the simulator. Combine both archived frameworks and their dSYMs with
-`xcodebuild -create-xcframework`. The simulator archive preserves arm64 and x86_64 slices.
-Do not edit the integrating app's Carthage/Checkouts copy; update its generated Carthage/Build artifact and pin the fork commit.
+HikMoa now requires iOS 15 under both Xcode 26 and 27. Archive the ZLPhotoBrowser scheme separately for
+generic/platform=iOS and generic/platform=iOS Simulator with Release, SKIP_INSTALL=NO,
+BUILD_LIBRARY_FOR_DISTRIBUTION=YES, IPHONEOS_DEPLOYMENT_TARGET=15.0 and signing disabled.
+Combine both archived frameworks and their dSYMs using xcodebuild -create-xcframework.
+Preserve device arm64 and simulator arm64/x86_64. Do not edit the integrating app's Carthage/Checkouts copy.
 
 ## Static self-check
 
-1. Bounds/failure: memory mode bypasses PHAsset array access; nil selection is explicit.
-2. Lifecycle: confirmation consumes the callback once; dismissals finish before returning the image; back retakes.
-3. Memory/disk: callbacks weakly reference controllers, no new file storage; photos release with the camera/preview.
-4. Concurrency: existing camera main-thread delivery presents the preview; no new queue or blocking wait.
-5. Crashes: local cell is registered before dequeue; no invented PHAsset or model force unwrap.
-6. Performance: reuses the image and preview cell; byte size comes from captured data, avoiding a second JPEG encoding.
+1. Bounds: memory mode bypasses PHAsset array access; nil selection and released controllers remain safe.
+2. Lifecycle: result consumption still prevents double return; editor → preview → camera dismissals are ordered.
+3. Memory/disk: callback lifetime is independent of controller release; no new temporary disk image or cache.
+4. Concurrency: UI work stays in the existing main-thread flow; no new locks or delayed transition actions.
+5. Crashes: mode access is read-only/optional, local cell registration is retained, no invented PHAsset/force unwrap.
+6. Performance: local preview reuses the image; diagnostic timers/logs were removed, and no asset readback is needed by the JSAPI.
 
-Build status (2026-11-10): final device and simulator archives both succeeded with Xcode 27 / iOS 15 minimum. Functional checks above remain pending manual verification.
-
-
-## Runtime diagnostic build camdiag-20261110a (pending user logs)
-
-The user confirmed saveToAlbum=false does not persist photos, but editing/finishing can leave ZLCustomCamera visible without controls.
-The screenshot identifies the exposed camera controller; it does not prove an iOS 27 compatibility defect.
-This revision adds diagnostics only and does not reorder callbacks or dismiss requests.
-
-Filter Xcode console by `[HikCameraTrace]`. Logs contain controller identities/ownership, transition flags,
-effective save/preview options, and album transaction events; no images, paths, names or asset identifiers.
-The memory-preview entry includes build=camdiag-20261110a to verify the loaded binary.
-
-Reproduce on the same device:
-1. false: shoot → preview → confirm without editing (control case).
-2. false: shoot → preview → edit something → finish (reported issue); wait two seconds when it sticks.
-3. false: edit → cancel editing → confirm; then preview → back → retake.
-4. true (remove any local forced-false override): shoot → wait in preview → confirm. Compare album.save.transaction/completion timestamps with preview appearance and confirmation, since the user observes album visibility only after confirming.
-
-Return the filtered log from manager.cameraEntry through the stuck state / final manager result.
-Key distinctions: editor.callback.beforePreviewCallback → preview.edit.autoDoneDecision → preview.done.entry;
-which controller is presented when camera.previewDismiss.request runs; whether previewDismiss.completion and cameraDismiss.completion fire;
-postcheck ownership at 0.8 seconds. The timer only observes; it never drives dismissal.
-
-Diagnostic static self-check: optional/released controllers are logged safely; all new lifecycle overrides call super;
-closures use weak controller references; no new file storage, shared mutable state, UI mutation or per-frame logging.
-Both framework archives and host build must pass before handing over. Functional resolution remains pending runtime logs.
-Temporary logs will be removed or made switchable after the user confirms the fix.
-
-
-## Log-confirmed fix camfix-20261110b
-
-User-provided true/false traces show the exact ownership failure. In memory mode, previewDismiss.request
-is sent while the navigation controller still presents ZLEditImageViewController. That request dismisses the editor.
-Its completion then calls camera.dismiss while the camera still presents the preview navigation controller,
-so that request dismisses the preview instead of the camera. manager.memoryResult fires with the camera still attached.
-The asset path returns successfully after its asynchronous processing; this failure does not require an iOS 27-specific fix.
-
-The full editor now returns in-memory preview results only after its own dismissal completes.
-The existing preview-dismiss → camera-dismiss → result sequence therefore targets the intended controllers.
-The crop-only editor follows the same rule when used for in-memory camera preview; asset previews keep their prior ordering.
-No arbitrary delay or extra dismiss attempt is introduced. Diagnostic logs remain until runtime confirmation.
-
-The true trace also records album.save.completion at 522827.492, before preview.viewDidAppear at 522827.580.
-This proves persistence preceded preview in that run; the later visibility reported in the Photos UI is not explained by this trace.
-
-Re-test false with actual edits and with no edits, false direct preview confirmation, cancellation/back/retake,
-and true as regression. Where used, also test the crop-only editor. Success requires camera.cameraDismiss.completion
-with attached=false and presenter=nil, followed by one manager.memoryResult and return to the original web page.
-Compare build=camfix-20261110b to ensure the fixed artifact is loaded. All runtime re-tests remain pending user verification.
-
-Static self-check: the mode property is read-only; empty selection/result handling is unchanged; callback consumption still prevents
-double return; dismissal completion captures the callback independently of controller lifetime; controller diagnostics remain weak;
-all UI transitions remain on the existing main-thread flow; no new storage, synchronization, layout work or image copies.
+Build verification is recorded in the integrating PR; final-confirm album behavior remains pending user validation.

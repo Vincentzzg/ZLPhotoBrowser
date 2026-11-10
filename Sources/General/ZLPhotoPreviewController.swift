@@ -211,11 +211,6 @@ class ZLPhotoPreviewController: UIViewController {
         ZLPhotoUIConfiguration.default().statusBarStyle
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        zl_cameraTrace("preview.viewDidDisappear", self)
-    }
-
     deinit {
         zl_debugPrint("ZLPhotoPreviewController deinit")
     }
@@ -258,7 +253,6 @@ class ZLPhotoPreviewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        zl_cameraTrace("preview.viewDidAppear", self)
         navigationController?.delegate = self
         
         guard isFirstAppear else { return }
@@ -703,10 +697,8 @@ class ZLPhotoPreviewController: UIViewController {
     }
     
     @objc private func editBtnClick() {
-        zl_cameraTrace("preview.edit.entry", self, "memory=\(cameraPhoto != nil)")
         if let photo = cameraPhoto {
             ZLEditImageViewController.showEditImageVC(parentVC: self, image: photo.image, editModel: photo.editModel) { [weak self] image, editModel in
-                zl_cameraTrace("preview.edit.result", self, "memory=true")
                 guard let self = self else { return }
                 photo.editedImage = image
                 photo.editModel = editModel
@@ -714,7 +706,6 @@ class ZLPhotoPreviewController: UIViewController {
                 self.collectionView.reloadData()
                 self.resetSubviewStatus()
                 let config = ZLPhotoConfiguration.default()
-                zl_cameraTrace("preview.edit.autoDoneDecision", self, "maxCount=\(config.maxSelectCount) showSelect=\(config.showSelectBtnWhenSingleSelect)")
                 if config.maxSelectCount == 1, !config.showSelectBtnWhenSingleSelect {
                     self.doneBtnClick()
                 }
@@ -806,7 +797,6 @@ class ZLPhotoPreviewController: UIViewController {
     }
     
     @objc private func doneBtnClick() {
-        zl_cameraTrace("preview.done.entry", self, "memory=\(cameraPhoto != nil) hasMemoryCallback=\(cameraPhotoDoneBlock != nil)")
         if let photo = cameraPhoto {
             // Consume the callback before dismissal to prevent a second tap returning twice.
             let completion = cameraPhotoDoneBlock

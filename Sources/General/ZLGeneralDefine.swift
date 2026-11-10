@@ -287,15 +287,3 @@ func zlLoggerInDebug(_ lastMessage: @autoclosure () -> String, file: StaticStrin
     debugPrint("file: \(file), line: \(line), func: \(funcName), message: \(lastMessage())")
     #endif
 }
-
-
-// Temporary camera diagnostics: controller identity/ownership only, never image or user content.
-func zl_cameraTrace(_ event: String, _ controller: UIViewController? = nil, _ detail: String = "") {
-    func identity(_ value: UIViewController?) -> String {
-        guard let value = value else { return "nil" }
-        return "\(type(of: value))@\(Unmanaged.passUnretained(value).toOpaque())"
-    }
-    let nav = controller?.navigationController
-    let time = String(format: "%.3f", ProcessInfo.processInfo.systemUptime)
-    NSLog("%@", "[HikCameraTrace] t=\(time) event=\(event) main=\(Thread.isMainThread) vc=\(identity(controller)) presenter=\(identity(controller?.presentingViewController)) presented=\(identity(controller?.presentedViewController)) nav=\(identity(nav)) navPresenter=\(identity(nav?.presentingViewController)) navPresented=\(identity(nav?.presentedViewController)) top=\(identity(nav?.topViewController)) attached=\(controller?.viewIfLoaded?.window != nil) dismissing=\(controller?.isBeingDismissed ?? false) presenting=\(controller?.isBeingPresented ?? false) transition=\(controller?.transitionCoordinator != nil) \(detail)")
-}

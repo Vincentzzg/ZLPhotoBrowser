@@ -80,3 +80,4 @@ Example/Example/Sources
 Sources/.DS_Store
 .DS_Store
 .build/
+/.claude/worktrees

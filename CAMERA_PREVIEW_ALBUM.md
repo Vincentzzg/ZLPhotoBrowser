@@ -25,13 +25,23 @@ The original image byte count is retained for the original-size label. No camera
 
 ## Build
 
-Use Xcode 26 on the packaging machine for the iOS 13 compatible distribution.
-Archive the ZLPhotoBrowser scheme with SKIP_INSTALL=NO, BUILD_LIBRARY_FOR_DISTRIBUTION=YES,
-IPHONEOS_DEPLOYMENT_TARGET=13.0, and signing disabled, for generic iOS and generic iOS Simulator.
-Combine the archived frameworks and their dSYMs with xcodebuild -create-xcframework.
-Do not edit the integrating app's Carthage/Checkouts copy.
+The integrating HikMoa app now requires iOS 15 on both Xcode 26 and Xcode 27.
+The locally built Xcode 27 / iOS 15 xcframework can therefore be used directly.
+The source API still defaults to album persistence for existing consumers.
 
-Local validation uses Xcode 27 / iOS 15 minimum (its supported minimum); those artifacts are for development validation only.
+For each destination (`generic/platform=iOS` and `generic/platform=iOS Simulator`), run:
+
+```sh
+xcodebuild archive -project ZLPhotoBrowser.xcodeproj -scheme ZLPhotoBrowser \
+  -configuration Release -destination 'generic/platform=iOS' \
+  -archivePath /tmp/ZLPhotoBrowser-device.xcarchive \
+  SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+  IPHONEOS_DEPLOYMENT_TARGET=15.0 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+```
+
+Use a separate archive path for the simulator. Combine both archived frameworks and their dSYMs with
+`xcodebuild -create-xcframework`. The simulator archive preserves arm64 and x86_64 slices.
+Do not edit the integrating app's Carthage/Checkouts copy; update its generated Carthage/Build artifact and pin the fork commit.
 
 ## Static self-check
 

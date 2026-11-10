@@ -44,6 +44,12 @@ open class ZLCustomCamera: UIViewController {
     
     @objc public var takeDoneBlock: ((UIImage?, URL?) -> Void)?
     
+    /// Controls album persistence for the after-take-photo preview. Defaults to the legacy behavior.
+    @objc public var saveToAlbum = true
+
+    /// Preview result for in-memory photos (saveToAlbum == false).
+    @objc public var photoPreviewDoneBlock: ((UIImage?, Bool) -> Void)?
+
     @objc public var getPhotoModelBlock: ((ZLResultModel?, Bool) -> Void)?
     
     @objc public var cancelBlock: (() -> Void)?
@@ -1404,6 +1410,29 @@ extension ZLCustomCamera: @preconcurrency AVCapturePhotoCaptureDelegate {
         handlePhotoOutputData(photo.fileDataRepresentation(), isError: error != nil)
     }
     
+    private func previewCameraPhoto(_ image: UIImage, byteCount: Int) {
+        let preview = ZLPhotoPreviewController(cameraImage: image, byteCount: byteCount)
+        let nav = ZLImageNavController(rootViewController: preview)
+        nav.isSelectedOriginal = true
+        preview.backBlock = { [weak self] in
+            self?.retakeBtnClick()
+        }
+        preview.cameraPhotoDoneBlock = { [weak self, weak nav] image, isOriginal in
+            nav?.dismiss(animated: true) { [weak self] in
+                guard let self = self else {
+                    return
+                }
+                let completion = self.photoPreviewDoneBlock
+                self.dismiss(animated: true) {
+                    completion?(image, isOriginal)
+                }
+            }
+        }
+        UIView.performWithoutAnimation {
+            showDetailViewController(nav, sender: nil)
+        }
+    }
+
     private func handlePhotoOutputData(_ data: Data?, isError: Bool) {
         ZLMainAsync {
             defer {
@@ -1430,6 +1459,10 @@ extension ZLCustomCamera: @preconcurrency AVCapturePhotoCaptureDelegate {
             
             if config.afterTakePhotoDidPreview {
                 if let image = self.takedImage {
+                    if !self.saveToAlbum {
+                        self.previewCameraPhoto(image, byteCount: data.count)
+                        return
+                    }
                     ZLPhotoManager.saveImageToAlbum(image: image) { error, asset in
                         guard let asset else {
                             debugPrint("保存图片到相册失败")

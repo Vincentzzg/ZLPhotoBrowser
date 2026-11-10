@@ -586,7 +586,9 @@ class ZLClipImageViewController: UIViewController {
         let image = clipImage()
         dismissAnimateFromRect = clipBoxFrame
         dismissAnimateImage = image.clipImage
-        if presentingViewController is ZLCustomCamera {
+        let preview = (presentingViewController as? ZLImageNavController)?.topViewController as? ZLPhotoPreviewController
+        if presentingViewController is ZLCustomCamera || preview?.isInMemoryCameraPreview == true {
+            // Match the full editor: do not let a synchronous camera result dismiss this editor twice.
             dismiss(animated: animate) {
                 self.clipDoneBlock?(self.angle, image.editRect, self.selectedRatio)
             }

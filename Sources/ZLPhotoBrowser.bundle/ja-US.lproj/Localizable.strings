@@ -74,6 +74,11 @@
 "depthEffect" = "ポートレート";
 "livePhotos" = "Live Photos";
 "animated" = "アニメーション";
+"longExposures" = "長時間露光";
+"raw" = "RAW";
+"cinematicVideos" = "シネマティック";
+"spatialMedia" = "空間";
+"screenRecordings" = "画面収録";
 "myPhotoStream" = "マイフォトストリーム";
 
 "noTitleAlbumListPlaceholder" = "画像すべて";

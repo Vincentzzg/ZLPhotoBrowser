@@ -130,7 +130,7 @@ import Foundation
     }
 }
 
-public struct ZLLocalLanguageKey: Hashable {
+public struct ZLLocalLanguageKey: Hashable, Sendable {
     public let rawValue: String
     
     public init(rawValue: String) {
@@ -340,6 +340,21 @@ public struct ZLLocalLanguageKey: Hashable {
     
     /// Animated (动图)
     public static let animated = ZLLocalLanguageKey(rawValue: "animated")
+    
+    /// Long Exposure (长曝光)
+    public static let longExposures = ZLLocalLanguageKey(rawValue: "longExposures")
+    
+    /// RAW
+    public static let raw = ZLLocalLanguageKey(rawValue: "raw")
+    
+    /// Cinematic (电影效果)
+    public static let cinematicVideos = ZLLocalLanguageKey(rawValue: "cinematicVideos")
+    
+    /// Spatial Media (空间媒体)
+    public static let spatialMedia = ZLLocalLanguageKey(rawValue: "spatialMedia")
+    
+    /// Screen Recordings (屏幕录制)
+    public static let screenRecordings = ZLLocalLanguageKey(rawValue: "screenRecordings")
     
     /// My Photo Stream (我的照片流)
     public static let myPhotoStream = ZLLocalLanguageKey(rawValue: "myPhotoStream")

@@ -74,6 +74,11 @@
 "depthEffect" = "인물 사진";
 "livePhotos" = "Live Photos";
 "animated" = "움직이는 항목";
+"longExposures" = "장노출";
+"raw" = "RAW";
+"cinematicVideos" = "시네마틱";
+"spatialMedia" = "공간";
+"screenRecordings" = "화면 녹화";
 "myPhotoStream" = "나의 사진 스트림";
 
 "noTitleAlbumListPlaceholder" = "모든 사진";

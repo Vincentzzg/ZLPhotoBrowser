@@ -91,16 +91,18 @@ public class ZLCameraConfiguration: NSObject {
     /// Whether to support switch camera. Defaults to true.
     public var allowSwitchCamera = true
     
+    /// Whether to dismiss custom camera when the app resigns active. Defaults to true.
+    /// If true, `ZLCustomCamera.cancelBlock` will be called after dismissing.
+    public var dismissWhenAppResignActive = true
+    
     /// Flag to enable tap-to-record functionality. Default is false.
     /// Note: This property is prioritized lower than `allowTakePhoto`.
     /// If `allowTakePhoto` is true, `tapToRecordVideo` will be ignored.
     public var tapToRecordVideo: Bool = false
     
-    private var _enableWideCameras: Bool = false
+    private var _enableWideCameras: Bool = true
     
     /// Enable the use of wide cameras (e.g., .builtInTripleCamera, .builtInDualWideCamera, .builtInDualCamera).
-    /// Only available on iOS 13.0 and higher, defaults to false.
-    @available(iOS 13.0, *)
     public var enableWideCameras: Bool {
         get {
             return _enableWideCameras
@@ -129,7 +131,6 @@ public class ZLCameraConfiguration: NSObject {
     
     private var pri_videoCodecType: Any?
     /// The codecs for video capture. Defaults to .h264
-    @available(iOS 11.0, *)
     public var videoCodecType: AVVideoCodecType {
         get {
             (pri_videoCodecType as? AVVideoCodecType) ?? .h264
@@ -313,6 +314,12 @@ public extension ZLCameraConfiguration {
     }
     
     @discardableResult
+    func dismissWhenAppResignActive(_ value: Bool) -> ZLCameraConfiguration {
+        dismissWhenAppResignActive = value
+        return self
+    }
+    
+    @discardableResult
     func videoExportType(_ type: ZLCameraConfiguration.VideoExportType) -> ZLCameraConfiguration {
         videoExportType = type
         return self
@@ -324,7 +331,6 @@ public extension ZLCameraConfiguration {
         return self
     }
     
-    @available(iOS 11.0, *)
     @discardableResult
     func videoCodecType(_ type: AVVideoCodecType) -> ZLCameraConfiguration {
         videoCodecType = type
@@ -337,7 +343,6 @@ public extension ZLCameraConfiguration {
         return self
     }
     
-    @available(iOS 13.0, *)
     @discardableResult
     func enableWideCameras(_ value: Bool) -> ZLCameraConfiguration {
         enableWideCameras = value

@@ -32,8 +32,7 @@ class ZLAlbumListCell: UITableViewCell {
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         if ZLPhotoUIConfiguration.default().cellCornerRadio > 0 {
-            view.layer.masksToBounds = true
-            view.layer.cornerRadius = ZLPhotoUIConfiguration.default().cellCornerRadio
+            view.zl.setCornerRadius(ZLPhotoUIConfiguration.default().cellCornerRadio)
         }
         return view
     }()
@@ -58,7 +57,7 @@ class ZLAlbumListCell: UITableViewCell {
     
     private var style: ZLPhotoBrowserStyle = .embedAlbumList
     
-    private var indicator: UIImageView = {
+    private lazy var indicator: UIImageView = {
         var image = UIImage.zl.getImage("zl_ablumList_arrow")
         if isRTL() {
             image = image?.imageFlippedForRightToLeftLayoutDirection()
@@ -66,6 +65,12 @@ class ZLAlbumListCell: UITableViewCell {
         
         let view = UIImageView(image: image)
         view.contentMode = .scaleAspectFit
+        return view
+    }()
+    
+    private lazy var separatorLine: UIView = {
+        let view = UIView()
+        view.backgroundColor = .zl.separatorLineColor
         return view
     }()
     
@@ -98,12 +103,14 @@ class ZLAlbumListCell: UITableViewCell {
         let width = contentView.zl.width
         let height = contentView.zl.height
         
-        let coverImageW = height - 4
+        let coverImageY: CGFloat = 0
+        let coverImageW = height
         let maxTitleW = width - coverImageW - 80
+        let separatorLineH: CGFloat = 1
         
         var titleW: CGFloat = 0
         var countW: CGFloat = 0
-        if let model = model {
+        if let model {
             titleW = min(
                 bounds.width / 3 * 2,
                 model.title.zl.boundingRect(
@@ -121,14 +128,14 @@ class ZLAlbumListCell: UITableViewCell {
         }
         
         if isRTL() {
-            let imageViewX: CGFloat
-            if style == .embedAlbumList {
-                imageViewX = width - coverImageW
-            } else {
-                imageViewX = width - coverImageW - 12
-            }
+            let imageViewX = width - coverImageW
             
-            coverImageView.frame = CGRect(x: imageViewX, y: 2, width: coverImageW, height: coverImageW)
+            coverImageView.frame = CGRect(
+                x: imageViewX,
+                y: coverImageY,
+                width: coverImageW,
+                height: coverImageW
+            )
             titleLabel.frame = CGRect(
                 x: coverImageView.zl.left - titleW - 10,
                 y: (height - 30) / 2,
@@ -143,18 +150,19 @@ class ZLAlbumListCell: UITableViewCell {
                 height: 30
             )
             selectBtn.frame = CGRect(x: 20, y: (height - 20) / 2, width: 20, height: 20)
-            indicator.frame = CGRect(x: 20, y: (bounds.height - 15) / 2, width: 15, height: 15)
+            indicator.frame = CGRect(x: 20, y: (height - 15) / 2, width: 15, height: 15)
+            separatorLine.frame = CGRect(x: 0, y: height - separatorLineH, width: width - coverImageW, height: separatorLineH)
             return
         }
         
-        let imageViewX: CGFloat
-        if style == .embedAlbumList {
-            imageViewX = 0
-        } else {
-            imageViewX = 12
-        }
+        let imageViewX: CGFloat = 0
         
-        coverImageView.frame = CGRect(x: imageViewX, y: 2, width: coverImageW, height: coverImageW)
+        coverImageView.frame = CGRect(
+            x: imageViewX,
+            y: coverImageY,
+            width: coverImageW,
+            height: coverImageW
+        )
         titleLabel.frame = CGRect(
             x: coverImageView.zl.right + 10,
             y: (bounds.height - 30) / 2,
@@ -164,6 +172,7 @@ class ZLAlbumListCell: UITableViewCell {
         countLabel.frame = CGRect(x: titleLabel.zl.right + 10, y: (height - 30) / 2, width: countW, height: 30)
         selectBtn.frame = CGRect(x: width - 20 - 20, y: (height - 20) / 2, width: 20, height: 20)
         indicator.frame = CGRect(x: width - 20 - 15, y: (height - 15) / 2, width: 15, height: 15)
+        separatorLine.frame = CGRect(x: coverImageView.zl.right, y: height - separatorLineH, width: width - coverImageView.zl.right, height: separatorLineH)
     }
     
     func setupUI() {
@@ -176,6 +185,7 @@ class ZLAlbumListCell: UITableViewCell {
         contentView.addSubview(countLabel)
         contentView.addSubview(selectBtn)
         contentView.addSubview(indicator)
+        contentView.addSubview(separatorLine)
     }
     
     func configureCell(model: ZLAlbumListModel, style: ZLPhotoBrowserStyle) {

@@ -38,6 +38,8 @@ ZLPhotoBrowser是一款微信样式的图片选择器，支持预览/相册内�
 ### 功能介绍
 你想要的应有尽有，部分功能如下，更多功能请查看 `ZLPhotoConfiguration` 中的参数定义（没有的话欢迎提 issue ，功能建议好的话会采纳并着手开发）
 - [x] 支持SwiftUI
+- [x] 支持iPad多窗口
+- [x] 支持iPhone Duo折叠屏
 - [x] 支持横竖屏
 - [x] 自选框架样式
 - [x] 支持分页加载
@@ -62,9 +64,11 @@ ZLPhotoBrowser是一款微信样式的图片选择器，支持预览/相册内�
 > 如果你在使用中有好的需求及建议，或者遇到什么bug，欢迎随时issue，我会及时的回复
  
 ### 框架支持
- * iOS 10.0
- * Swift 5.x
- * Xcode 14.x
+
+|版本|iOS|Xcode|
+|---|---|---|
+|>=6.0.0|15.0|27|
+|<6.0.0|10.0|26|
  
 ### 使用示例
  - 快速选择
@@ -104,22 +108,26 @@ ZLPhotoBrowser是一款微信样式的图片选择器，支持预览/相册内�
 ### 更新日志
 > [更多更新日志](https://github.com/longitachi/ZLPhotoBrowser/blob/master/CHANGELOG.md)
 ```
+● 6.0.0
+  Add:
+    适配iPhoneDuo，升级API至iOS 15.
+● 5.0.0
+  Add:
+    优化iPad多任务及自定义窗口大小下的UI体验。
+    适配iOS 26及iOS 27部分API；Demo支持iPad多窗口。
+    新增参数控制App进入后台时是否关闭相机。
+    新增 `supportLandscape` 属性控制是否支持横屏；`enableWideCameras` 默认值改为 true。
+    新增 `thumbVCAllowPanToDismiss` 属性控制小图界面是否支持边缘侧滑返回。
+    大幅优化贴纸及涂鸦编辑体验。
+    更新相册过滤逻辑，显示更多系统相册。
+  Fix:
+    修复仅允许选择视频时，达到上限后提示文案错误的问题。#1048
+    修复选择透明底 PNG 图片被渲染为白色背景的问题。#1045
+    修复在预览页取消选中后，缩略图列表和大图预览选中状态未同步的问题。#1042
 ● 4.7.4
   Add:
     支持同时编辑多个视频
     开源协议由MIT改为Apache-2.0
-● 4.7.3
-  Fix:
-    修复编辑图片时，橡皮擦位置显示不正确的问题
-● 4.7.2
-  Add:
-    优化视频编辑体验：
-      1. 非选中区域增加阴影遮罩
-      2. 增加当前选中区域时长显示
-    ZLImagePreviewController界面支持禁止下拉返回手势
-    修改ZLPhotoPreviewSheet的权限为private
-  Fix:
-    修复权限为"limited"时，小图界面UI可能显示错误的bug
 ...
 ```
 
@@ -144,7 +152,7 @@ ZLPhotoBrowser是一款微信样式的图片选择器，支持预览/相册内�
   
 * Swift Package Manager
   * 1. 选择 File > Swift Packages > Add Package Dependency，输入 `https://github.com/longitachi/ZLPhotoBrowser.git`
-  * 2. 输入对应版本号（SPM 最低版本为 `4.7.4`）
+  * 2. 输入对应版本号（SPM 最低版本为 `6.0.0`）
   * 3. 等Xcode下载完成后确定即可
 
 ### 支持

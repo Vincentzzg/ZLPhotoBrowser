@@ -81,7 +81,7 @@ class ZLPreviewBaseCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         var width = viewW
         
         // video和livephoto没必要处理长图和宽图
-        if UIApplication.shared.statusBarOrientation.isLandscape {
+        if UIApplication.shared.zl.isLandscape {
             let height = viewH
             frame.size.height = height
             
@@ -120,7 +120,7 @@ class ZLPreviewBaseCell: UICollectionViewCell, UIGestureRecognizerDelegate {
         
         imageView.frame = frame
         
-        if UIApplication.shared.statusBarOrientation.isLandscape {
+        if UIApplication.shared.zl.isLandscape {
             if frame.height < viewH {
                 imageView.center = CGPoint(x: viewW / 2, y: viewH / 2)
             } else {
@@ -1284,7 +1284,7 @@ class ZLPreviewView: UIView {
     
     func resetSubViewSize() {
         let size: CGSize
-        if let model = model {
+        if let model {
             if let ei = model.editImage {
                 size = ei.size
             } else {
@@ -1301,7 +1301,7 @@ class ZLPreviewView: UIView {
         
         var width = viewW
         
-        if UIApplication.shared.statusBarOrientation.isLandscape {
+        if UIApplication.shared.zl.isLandscape {
             let height = viewH
             frame.size.height = height
             
@@ -1351,7 +1351,7 @@ class ZLPreviewView: UIView {
         containerView.frame = frame
         
         var contenSize: CGSize = .zero
-        if UIApplication.shared.statusBarOrientation.isLandscape {
+        if UIApplication.shared.zl.isLandscape {
             contenSize = CGSize(width: width, height: max(viewH, frame.height))
             if frame.height < viewH {
                 containerView.center = CGPoint(x: viewW / 2, y: viewH / 2)

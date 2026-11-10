@@ -198,13 +198,17 @@ public class ZLPhotoManager: NSObject {
                 if collection.assetCollectionSubtype == .smartAlbumAllHidden {
                     return
                 }
-                if #available(iOS 11.0, *), collection.assetCollectionSubtype.rawValue > PHAssetCollectionSubtype.smartAlbumLongExposures.rawValue {
+                
+                let subtype = collection.assetCollectionSubtype
+                if subtype == .any || subtype == .smartAlbumUnableToUpload {
                     return
                 }
+                
                 let result = PHAsset.fetchAssets(in: collection, options: option)
                 if result.count == 0 {
                     return
                 }
+                
                 let title = self.getCollectionTitle(collection)
                 
                 if collection.assetCollectionSubtype == .smartAlbumUserLibrary {
@@ -294,14 +298,20 @@ public class ZLPhotoManager: NSObject {
                 title = localLanguageTextValue(.depthEffect)
             case .smartAlbumLivePhotos:
                 title = localLanguageTextValue(.livePhotos)
+            case .smartAlbumAnimated:
+                title = localLanguageTextValue(.animated)
+            case .smartAlbumLongExposures:
+                title = localLanguageTextValue(.longExposures)
+            case .smartAlbumRAW:
+                title = localLanguageTextValue(.raw)
+            case .smartAlbumCinematic:
+                title = localLanguageTextValue(.cinematicVideos)
+            case .smartAlbumSpatial:
+                title = localLanguageTextValue(.spatialMedia)
+            case .smartAlbumScreenRecordings:
+                title = localLanguageTextValue(.screenRecordings)
             default:
                 title = collection.localizedTitle
-            }
-            
-            if #available(iOS 11.0, *) {
-                if collection.assetCollectionSubtype == PHAssetCollectionSubtype.smartAlbumAnimated {
-                    title = localLanguageTextValue(.animated)
-                }
             }
         }
         
@@ -342,14 +352,8 @@ public class ZLPhotoManager: NSObject {
             }
         }
         
-        if #available(iOS 13.0, *) {
-            return PHImageManager.default().requestImageDataAndOrientation(for: asset, options: option) { data, _, _, info in
-                resultHandler(data, info)
-            }
-        } else {
-            return PHImageManager.default().requestImageData(for: asset, options: option) { data, _, _, info in
-                resultHandler(data, info)
-            }
+        return PHImageManager.default().requestImageDataAndOrientation(for: asset, options: option) { data, _, _, info in
+            resultHandler(data, info)
         }
     }
     
@@ -366,7 +370,7 @@ public class ZLPhotoManager: NSObject {
         
         return PHImageManager.default().requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: option) { image, info in
             var downloadFinished = false
-            if let info = info {
+            if let info {
                 downloadFinished = !(info[PHImageCancelledKey] as? Bool ?? false) && (info[PHImageErrorKey] == nil)
             }
             let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool ?? false)
@@ -403,13 +407,18 @@ public class ZLPhotoManager: NSObject {
         if asset.zl.isInCloud {
             return PHImageManager.default().requestExportSession(forVideo: asset, options: option, exportPreset: AVAssetExportPresetHighestQuality, resultHandler: { session, info in
                 // iOS11 and earlier, callback is not on the main thread.
+                nonisolated(unsafe) let session = session
+                nonisolated(unsafe) let info = info
+                nonisolated(unsafe) let completion = completion
                 ZLMainAsync {
-                    let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool ?? false)
-                    if let avAsset = session?.asset {
-                        let item = AVPlayerItem(asset: avAsset)
-                        completion(item, info, isDegraded)
-                    } else {
-                        completion(nil, nil, true)
+                    MainActor.assumeIsolated {
+                        let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool ?? false)
+                        if let avAsset = session?.asset {
+                            let item = AVPlayerItem(asset: avAsset)
+                            completion(item, info, isDegraded)
+                        } else {
+                            completion(nil, nil, true)
+                        }
                     }
                 }
             })

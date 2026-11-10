@@ -74,6 +74,11 @@
 "depthEffect" = "Chân dung";
 "livePhotos" = "Live Photos";
 "animated" = "Hình động";
+"longExposures" = "Phơi sáng dài";
+"raw" = "RAW";
+"cinematicVideos" = "Điện ảnh";
+"spatialMedia" = "Không gian";
+"screenRecordings" = "Ghi màn hình";
 "myPhotoStream" = "Kho ảnh của tôi";
 
 "noTitleAlbumListPlaceholder" = "Tất cả ảnh";

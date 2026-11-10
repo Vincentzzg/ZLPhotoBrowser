@@ -74,6 +74,11 @@
 "depthEffect" = "Potret";
 "livePhotos" = "Live Photos";
 "animated" = "Beranimasi";
+"longExposures" = "Pendedahan Panjang";
+"raw" = "RAW";
+"cinematicVideos" = "Sinematik";
+"spatialMedia" = "Ruang";
+"screenRecordings" = "Rakaman Skrin";
 "myPhotoStream" = "Strim Foto Saya";
 
 "noTitleAlbumListPlaceholder" = "Semua Foto";

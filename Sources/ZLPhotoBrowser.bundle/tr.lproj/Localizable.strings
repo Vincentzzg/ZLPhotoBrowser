@@ -74,6 +74,11 @@
 "depthEffect" = "Portreler";
 "livePhotos" = "Live Photo'lar";
 "animated" = "Hareketli";
+"longExposures" = "Uzun Poz";
+"raw" = "RAW";
+"cinematicVideos" = "Sinematik";
+"spatialMedia" = "Uzamsal";
+"screenRecordings" = "Ekran Kayıtları";
 "myPhotoStream" = "Fotoğraf Akışım";
 
 "noTitleAlbumListPlaceholder" = "Tüm Fotoğraflar";

@@ -49,7 +49,7 @@ class ZLCameraCell: UICollectionViewCell {
         }
     }
     
-    deinit {
+    isolated deinit {
         session?.stopRunning()
         session = nil
         zl_debugPrint("ZLCameraCell deinit")
@@ -86,11 +86,11 @@ class ZLCameraCell: UICollectionViewCell {
             return
         }
         session?.stopRunning()
-        if let input = videoInput {
-            session?.removeInput(input)
+        if let videoInput {
+            session?.removeInput(videoInput)
         }
-        if let output = photoOutput {
-            session?.removeOutput(output)
+        if let photoOutput {
+            session?.removeOutput(photoOutput)
         }
         session = nil
         previewLayer?.removeFromSuperlayer()

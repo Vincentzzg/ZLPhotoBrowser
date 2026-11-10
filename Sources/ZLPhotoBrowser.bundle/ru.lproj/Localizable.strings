@@ -74,6 +74,11 @@
 "depthEffect" = "Портреты";
 "livePhotos" = "Live Photos";
 "animated" = "Анимированные";
+"longExposures" = "Длинная выдержка";
+"raw" = "RAW";
+"cinematicVideos" = "Кинематографические";
+"spatialMedia" = "Пространственное";
+"screenRecordings" = "Записи экрана";
 "myPhotoStream" = "Мой фотопоток";
 
 "noTitleAlbumListPlaceholder" = "Все фотографии";

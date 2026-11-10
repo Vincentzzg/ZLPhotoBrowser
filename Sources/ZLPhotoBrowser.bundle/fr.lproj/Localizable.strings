@@ -74,6 +74,11 @@
 "depthEffect" = "Portrait";
 "livePhotos" = "Live Photos";
 "animated" = "Animations";
+"longExposures" = "Longue exposition";
+"raw" = "RAW";
+"cinematicVideos" = "Cinématique";
+"spatialMedia" = "Spatial";
+"screenRecordings" = "Enregistrements d'écran";
 "myPhotoStream" = "Mon flux de photos";
 
 "noTitleAlbumListPlaceholder" = "Toutes les photos";

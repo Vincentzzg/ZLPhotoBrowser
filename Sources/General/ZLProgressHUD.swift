@@ -29,6 +29,16 @@ import UIKit
 public class ZLProgressHUD: UIView {
     private let style: ZLProgressHUD.Style
     
+    private lazy var containerView: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 135, height: 135))
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 12
+        view.backgroundColor = style.bgColor
+        view.clipsToBounds = true
+        view.center = center
+        return view
+    }()
+    
     private lazy var loadingView = UIImageView(image: style.icon)
     
     private lazy var titleLabel: UILabel = {
@@ -55,7 +65,7 @@ public class ZLProgressHUD: UIView {
     
     public init(style: ZLProgressHUD.Style) {
         self.style = style
-        super.init(frame: UIScreen.main.bounds)
+        super.init(frame: .zero)
         setupUI()
     }
     
@@ -64,28 +74,29 @@ public class ZLProgressHUD: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        if let superview {
+            frame = superview.bounds
+            containerView.center = center
+        }
+    }
+    
     private func setupUI() {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: 135, height: 135))
-        view.layer.masksToBounds = true
-        view.layer.cornerRadius = 12
-        view.backgroundColor = style.bgColor
-        view.clipsToBounds = true
-        view.center = center
-        
         if let effectStyle = style.blurEffectStyle {
             let effect = UIBlurEffect(style: effectStyle)
             let effectView = UIVisualEffectView(effect: effect)
-            effectView.frame = view.bounds
-            view.addSubview(effectView)
+            effectView.frame = containerView.bounds
+            containerView.addSubview(effectView)
         }
         
         loadingView.frame = CGRect(x: 135 / 2 - 20, y: 27, width: 40, height: 40)
-        view.addSubview(loadingView)
+        containerView.addSubview(loadingView)
         
-        titleLabel.frame = CGRect(x: 10, y: 70, width: view.bounds.width - 20, height: 60)
-        view.addSubview(titleLabel)
+        titleLabel.frame = CGRect(x: 10, y: 70, width: containerView.bounds.width - 20, height: 60)
+        containerView.addSubview(titleLabel)
         
-        addSubview(view)
+        addSubview(containerView)
     }
     
     private func startAnimation() {
@@ -101,13 +112,15 @@ public class ZLProgressHUD: UIView {
     
     public func show(
         toast: ZLProgressHUD.Toast = .loading,
-        in view: UIView? = UIApplication.shared.keyWindow,
+        in view: UIView? = nil,
         timeout: TimeInterval = 100
     ) {
+        let sv = view ?? UIApplication.shared.zl.activeWindow
+        
         ZLMainAsync {
             self.titleLabel.text = toast.value
             self.startAnimation()
-            view?.addSubview(self)
+            sv?.addSubview(self)
         }
         
         if timeout > 0 {
@@ -139,7 +152,7 @@ public class ZLProgressHUD: UIView {
 public extension ZLProgressHUD {
     class func show(
         toast: ZLProgressHUD.Toast = .loading,
-        in view: UIView? = UIApplication.shared.keyWindow,
+        in view: UIView? = nil,
         timeout: TimeInterval = 100
     ) -> ZLProgressHUD {
         let hud = ZLProgressHUD(style: ZLPhotoUIConfiguration.default().hudStyle)

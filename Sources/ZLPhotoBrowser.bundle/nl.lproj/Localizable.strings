@@ -74,6 +74,11 @@
 "depthEffect" = "Afbeelding";
 "livePhotos" = "Live foto's";
 "animated" = "Dynamisch diagram";
+"longExposures" = "Lange sluitertijd";
+"raw" = "RAW";
+"cinematicVideos" = "Cinematisch";
+"spatialMedia" = "Ruimtelijk";
+"screenRecordings" = "Schermopnames";
 "myPhotoStream" = "Mijn foto stream";
 
 "noTitleAlbumListPlaceholder" = "Alle foto's";

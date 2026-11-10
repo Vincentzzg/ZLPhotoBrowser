@@ -73,9 +73,7 @@ public class ZLImagePreviewController: UIViewController {
         view.delegate = self
         view.isPagingEnabled = true
         view.showsHorizontalScrollIndicator = false
-        if #available(iOS 11.0, *) {
-            view.contentInsetAdjustmentBehavior = .never
-        }
+        view.contentInsetAdjustmentBehavior = .never
         
         ZLPhotoPreviewCell.zl.register(view)
         ZLGifPreviewCell.zl.register(view)
@@ -104,9 +102,6 @@ public class ZLImagePreviewController: UIViewController {
         var image = UIImage.zl.getImage("zl_navBack")
         if isRTL() {
             image = image?.imageFlippedForRightToLeftLayoutDirection()
-            btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -10)
-        } else {
-            btn.imageEdgeInsets = UIEdgeInsets(top: 0, left: -10, bottom: 0, right: 0)
         }
         btn.setImage(image, for: .normal)
         btn.addTarget(self, action: #selector(backBtnClick), for: .touchUpInside)
@@ -159,6 +154,10 @@ public class ZLImagePreviewController: UIViewController {
     
     private var orientation: UIInterfaceOrientation = .unknown
     
+    private var isAdjustingCollectionLayout = false
+    
+    private var lastCollectionViewSize: CGSize = .zero
+    
     private var imageRequestID: PHImageRequestID?
     
     private var urlDownloadTask: URLSessionDownloadTask?
@@ -189,7 +188,7 @@ public class ZLImagePreviewController: UIViewController {
         ZLPhotoUIConfiguration.default().statusBarStyle
     }
     
-    deinit {
+    isolated deinit {
         cancelImageRequest()
         urlDownloadTask?.cancel()
         zl_debugPrint("ZLImagePreviewController deinit")
@@ -256,16 +255,12 @@ public class ZLImagePreviewController: UIViewController {
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
-        if #available(iOS 11.0, *) {
-            insets = view.safeAreaInsets
-        }
-        insets.top = max(20, insets.top)
+        let insets = view.zl.owningVCRootViewModifiedSafeAreaInsets
         
         collectionView.frame = CGRect(
-            x: -ZLPhotoPreviewController.colItemSpacing / 2,
+            x: -ZLImagePreviewController.colItemSpacing / 2,
             y: 0,
-            width: view.zl.width + ZLPhotoPreviewController.colItemSpacing,
+            width: view.zl.width + ZLImagePreviewController.colItemSpacing,
             height: view.zl.height
         )
         
@@ -273,7 +268,8 @@ public class ZLImagePreviewController: UIViewController {
         navView.frame = CGRect(x: 0, y: 0, width: view.zl.width, height: navH)
         navBlurView?.frame = navView.bounds
         
-        indexLabel.frame = CGRect(x: (view.zl.width - 80) / 2, y: insets.top, width: 80, height: 44)
+        let totalW = view.zl.width - insets.left - insets.right
+        indexLabel.frame = CGRect(x: (totalW - 80) / 2 + insets.left, y: insets.top, width: 80, height: 44)
         
         if isRTL() {
             backBtn.frame = CGRect(x: view.zl.width - insets.right - 60, y: insets.top, width: 60, height: 44)
@@ -290,22 +286,46 @@ public class ZLImagePreviewController: UIViewController {
         
         resetBottomViewFrame()
         
-        let ori = UIApplication.shared.statusBarOrientation
-        if ori != orientation {
+        let ori = UIApplication.shared.zl.interfaceOrientation
+        let collectionViewSize = collectionView.bounds.size
+        if !isAdjustingCollectionLayout, ori != orientation || collectionViewSize != lastCollectionViewSize {
             orientation = ori
-            collectionView.setContentOffset(
-                CGPoint(
-                    x: (view.zl.width + ZLPhotoPreviewController.colItemSpacing) * CGFloat(indexBeforOrientationChanged),
-                    y: 0
-                ),
-                animated: false
-            )
+            lastCollectionViewSize = collectionViewSize
+            resetCollectionViewLayoutAndOffset()
         }
     }
     
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        collectionView.collectionViewLayout.invalidateLayout()
+        
+        indexBeforOrientationChanged = currentIndex
+        isAdjustingCollectionLayout = true
+        
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            self?.resetCollectionViewLayoutAndOffset(width: size.width + ZLImagePreviewController.colItemSpacing)
+        }, completion: { [weak self] _ in
+            guard let `self` else { return }
+            self.resetCollectionViewLayoutAndOffset()
+            self.isAdjustingCollectionLayout = false
+            self.orientation = UIApplication.shared.zl.interfaceOrientation
+            self.lastCollectionViewSize = self.collectionView.bounds.size
+            self.reloadCurrentCell()
+        })
+    }
+    
+    private func resetCollectionViewLayoutAndOffset(width: CGFloat? = nil) {
+        let pageWidth = width ?? collectionView.bounds.width
+        let maxIndex = max(0, datas.count - 1)
+        indexBeforOrientationChanged = min(indexBeforOrientationChanged, maxIndex)
+        
+        UIView.performWithoutAnimation {
+            collectionView.collectionViewLayout.invalidateLayout()
+            collectionView.layoutIfNeeded()
+            collectionView.setContentOffset(
+                CGPoint(x: pageWidth * CGFloat(indexBeforOrientationChanged), y: 0),
+                animated: false
+            )
+        }
     }
     
     private func reloadCurrentCell() {
@@ -322,9 +342,6 @@ public class ZLImagePreviewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .zl.previewVCBgColor
-        if #unavailable(iOS 11.0) {
-            automaticallyAdjustsScrollViewInsets = false
-        }
         
         view.addSubview(navView)
         
@@ -428,6 +445,7 @@ public class ZLImagePreviewController: UIViewController {
             return
         }
         
+        let insets = view.zl.owningVCRootViewModifiedSafeAreaInsets
         let btnY = ZLLayout.bottomToolBtnY
         
         var doneTitle = localLanguageTextValue(.done)
@@ -438,7 +456,7 @@ public class ZLImagePreviewController: UIViewController {
             doneTitle += "(" + String(selCount) + ")"
         }
         let doneBtnW = doneTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width + 20
-        doneBtn.frame = CGRect(x: bottomView.bounds.width - doneBtnW - 15, y: btnY, width: doneBtnW, height: ZLLayout.bottomToolBtnH)
+        doneBtn.frame = CGRect(x: bottomView.bounds.width - doneBtnW - 15 - insets.right, y: btnY, width: doneBtnW, height: ZLLayout.bottomToolBtnH)
         doneBtn.setTitle(doneTitle, for: .normal)
     }
     
@@ -519,7 +537,7 @@ extension ZLImagePreviewController: UIViewControllerTransitioningDelegate {
 
 public extension ZLImagePreviewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView == collectionView else {
+        guard scrollView == collectionView, !isAdjustingCollectionLayout else {
             return
         }
         
@@ -527,7 +545,7 @@ public extension ZLImagePreviewController {
         
         NotificationCenter.default.post(name: ZLPhotoPreviewController.previewVCScrollNotification, object: nil)
         let offset = scrollView.contentOffset
-        var page = Int(round(offset.x / (view.bounds.width + ZLPhotoPreviewController.colItemSpacing)))
+        var page = Int(round(offset.x / (view.bounds.width + ZLImagePreviewController.colItemSpacing)))
         page = max(0, min(page, datas.count - 1))
         if page == currentIndex {
             return
@@ -681,7 +699,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if cell is ZLLocalImagePreviewCell,
                let url = datas[currentIndex] as? URL {
-                let hud = ZLProgressHUD.show(toast: .processing)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
                 urlDownloadTask?.cancel()
                 urlDownloadTask = URLSession.shared.downloadTask(with: url) { localURL, _, error in
                     ZLMainAsync {
@@ -709,7 +727,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if cell is ZLNetVideoPreviewCell,
                let url = datas[currentIndex] as? URL {
-                let hud = ZLProgressHUD.show(toast: .processing)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
                 urlDownloadTask?.cancel()
                 urlDownloadTask = URLSession.shared.downloadTask(with: url) { localURL, _, error in
                     ZLMainAsync {
@@ -746,7 +764,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if (cell is ZLPhotoPreviewCell || cell is ZLGifPreviewCell),
                let asset = datas[currentIndex] as? PHAsset {
-                let hud = ZLProgressHUD.show(toast: .processing, timeout: ZLPhotoUIConfiguration.default().timeout)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window, timeout: ZLPhotoUIConfiguration.default().timeout)
                 hud.timeoutBlock = { [weak self] in
                     self?.cancelImageRequest()
                 }
@@ -771,7 +789,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if cell is ZLVideoPreviewCell,
                let asset = datas[currentIndex] as? PHAsset {
-                let hud = ZLProgressHUD.show(toast: .processing)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
                 let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
                     .appendingPathComponent(UUID().uuidString)
                     .appendingPathExtension("mp4")

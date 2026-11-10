@@ -66,6 +66,8 @@ class CustomAlertController: UIViewController {
     /// 通过按钮获取对应的action
     private lazy var btnToActionMap: [UIButton: ZLCustomAlertAction] = [:]
     
+    private var isiPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    
     var alertFrame: CGRect { container.frame }
     
     init(title: String?, message: String, preferredStyle: ZLCustomAlertStyle) {
@@ -97,15 +99,35 @@ class CustomAlertController: UIViewController {
         view.addGestureRecognizer(tap)
         
         view.addSubview(container)
+        
+        let windowWidth = getActionWindow()?.frame.width ?? UIScreen.main.bounds.width
         if preferredStyle == .alert {
             container.snp.makeConstraints { make in
                 make.center.equalToSuperview()
-                make.width.equalTo(min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) * 0.8)
+                if isiPad {
+                    if windowWidth < 400 {
+                        make.width.equalTo(windowWidth * 0.8)
+                    } else {
+                        make.width.equalTo(330)
+                    }
+                } else {
+                    make.width.equalTo(min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) * 0.8)
+                }
             }
         } else {
             container.snp.makeConstraints { make in
-                make.left.right.equalToSuperview()
-                make.bottom.equalToSuperview().offset(cornerRadiu)
+                if isiPad {
+                    make.centerX.equalToSuperview()
+                    make.bottom.equalToSuperview().offset(cornerRadiu)
+                    if windowWidth < 400 {
+                        make.width.equalTo(windowWidth * 0.8)
+                    } else {
+                        make.width.equalTo(330)
+                    }
+                } else {
+                    make.left.right.equalToSuperview()
+                    make.bottom.equalToSuperview().offset(cornerRadiu)
+                }
             }
         }
         
@@ -239,6 +261,17 @@ class CustomAlertController: UIViewController {
         
         dismiss(animated: true) {
             action.handler?(action)
+        }
+    }
+    
+    private func getActionWindow() -> UIWindow? {
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+        } else {
+            return UIApplication.shared.keyWindow
         }
     }
 }

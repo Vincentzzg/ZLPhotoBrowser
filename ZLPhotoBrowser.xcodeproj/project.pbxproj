@@ -68,14 +68,17 @@
 		FD34FC622AD25A2100AE4344 /* UIScrollView+ZLPhotoBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD34FC612AD25A2100AE4344 /* UIScrollView+ZLPhotoBrowser.swift */; };
 		FD3B66982B984BB0009C7353 /* ZLWeakProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3B66972B984BB0009C7353 /* ZLWeakProxy.swift */; };
 		FD4C971B29F11918000249BF /* ZLCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4C971A29F11918000249BF /* ZLCollectionViewFlowLayout.swift */; };
+		FD5210052FE23A9A00027B9C /* UIApplication+ZLPhotoBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5210042FE23A9A00027B9C /* UIApplication+ZLPhotoBrowser.swift */; };
 		FD5230B5281562DD0034B782 /* ZLEnlargeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5230B4281562DD0034B782 /* ZLEnlargeButton.swift */; };
 		FD74F6DD29345E4100B7916A /* ZLBaseStickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD74F6DC29345E4100B7916A /* ZLBaseStickerView.swift */; };
 		FD8B6E2B2E27834600C2DB56 /* ZLThumbnailDismissInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD8B6E2A2E27834600C2DB56 /* ZLThumbnailDismissInteractiveTransition.swift */; };
 		FD8FEA6728C8B9B60041374B /* ZLResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD8FEA6628C8B9B60041374B /* ZLResultModel.swift */; };
+		FDA0000A2E000001000A0001 /* ZLStickerGestureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA0000A2E000001000A0002 /* ZLStickerGestureCoordinator.swift */; };
 		FDA31DCA2D81AEC4008C17B0 /* ZLPhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA31DC92D81AEC4008C17B0 /* ZLPhotoPicker.swift */; };
 		FDA31DCC2D82B27C008C17B0 /* Runtime+ZLPhotoBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA31DCB2D82B27C008C17B0 /* Runtime+ZLPhotoBrowser.swift */; };
 		FDA31DD02D82DDB0008C17B0 /* ZLNoAuthTipsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA31DCF2D82DDB0008C17B0 /* ZLNoAuthTipsView.swift */; };
 		FDA54B8B2876D8CA0077F4FA /* UIFont+ZLPhotoBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA54B8A2876D8CA0077F4FA /* UIFont+ZLPhotoBrowser.swift */; };
+		FDAA00012E95051200000001 /* ZLTextStickerContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAA00022E95051200000002 /* ZLTextStickerContentView.swift */; };
 		FDAE00A9297134C100EE9486 /* ZLAnimationUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDAE00A8297134C100EE9486 /* ZLAnimationUtils.swift */; };
 		FDB34114280D0D70008F20B3 /* ZLPhotoUIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB34113280D0D70008F20B3 /* ZLPhotoUIConfiguration.swift */; };
 		FDB34268280E6566008F20B3 /* ZLPhotoUIConfiguration+Chaining.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDB34267280E6566008F20B3 /* ZLPhotoUIConfiguration+Chaining.swift */; };
@@ -155,14 +158,17 @@
 		FD3B66972B984BB0009C7353 /* ZLWeakProxy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZLWeakProxy.swift; sourceTree = "<group>"; };
 		FD4C971A29F11918000249BF /* ZLCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
 		FD5142B12BB2BD5A00FCBD05 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		FD5210042FE23A9A00027B9C /* UIApplication+ZLPhotoBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+ZLPhotoBrowser.swift"; sourceTree = "<group>"; };
 		FD5230B4281562DD0034B782 /* ZLEnlargeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLEnlargeButton.swift; sourceTree = "<group>"; };
 		FD74F6DC29345E4100B7916A /* ZLBaseStickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLBaseStickerView.swift; sourceTree = "<group>"; };
 		FD8B6E2A2E27834600C2DB56 /* ZLThumbnailDismissInteractiveTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLThumbnailDismissInteractiveTransition.swift; sourceTree = "<group>"; };
 		FD8FEA6628C8B9B60041374B /* ZLResultModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLResultModel.swift; sourceTree = "<group>"; };
+		FDA0000A2E000001000A0002 /* ZLStickerGestureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLStickerGestureCoordinator.swift; sourceTree = "<group>"; };
 		FDA31DC92D81AEC4008C17B0 /* ZLPhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLPhotoPicker.swift; sourceTree = "<group>"; };
 		FDA31DCB2D82B27C008C17B0 /* Runtime+ZLPhotoBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runtime+ZLPhotoBrowser.swift"; sourceTree = "<group>"; };
 		FDA31DCF2D82DDB0008C17B0 /* ZLNoAuthTipsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLNoAuthTipsView.swift; sourceTree = "<group>"; };
 		FDA54B8A2876D8CA0077F4FA /* UIFont+ZLPhotoBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIFont+ZLPhotoBrowser.swift"; sourceTree = "<group>"; };
+		FDAA00022E95051200000002 /* ZLTextStickerContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLTextStickerContentView.swift; sourceTree = "<group>"; };
 		FDAE00A8297134C100EE9486 /* ZLAnimationUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLAnimationUtils.swift; sourceTree = "<group>"; };
 		FDB34113280D0D70008F20B3 /* ZLPhotoUIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZLPhotoUIConfiguration.swift; sourceTree = "<group>"; };
 		FDB34267280E6566008F20B3 /* ZLPhotoUIConfiguration+Chaining.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ZLPhotoUIConfiguration+Chaining.swift"; sourceTree = "<group>"; };
@@ -261,6 +267,7 @@
 				FD24655728E2A96200C15B20 /* UIView+ZLPhotoBrowser.swift */,
 				FD34FC612AD25A2100AE4344 /* UIScrollView+ZLPhotoBrowser.swift */,
 				FDC8ED0A2B0F4032002EB8B9 /* UIGraphicsImageRenderer+ZLPhotoBrowser.swift */,
+				FD5210042FE23A9A00027B9C /* UIApplication+ZLPhotoBrowser.swift */,
 				FDCED6F32CDE2CF800A2A94B /* AVCaptureDevice+ZLPhotoBrowser.swift */,
 				FDA31DCB2D82B27C008C17B0 /* Runtime+ZLPhotoBrowser.swift */,
 			);
@@ -332,8 +339,10 @@
 				FD0898862E8952B400D9C161 /* ZLEditVideoOverlayView.swift */,
 				FD1FAA592AC2C170006F95E5 /* ZLBaseStickertState.swift */,
 				FD74F6DC29345E4100B7916A /* ZLBaseStickerView.swift */,
+				FDA0000A2E000001000A0002 /* ZLStickerGestureCoordinator.swift */,
 				E44A20FA2567B11400FE6CAE /* ZLImageStickerView.swift */,
 				E4D06915254C0F7F002278C4 /* ZLTextStickerView.swift */,
+				FDAA00022E95051200000002 /* ZLTextStickerContentView.swift */,
 				FD047621276B6C8500A93FA3 /* ZLEditToolCells.swift */,
 				FD047628276C7C1C00A93FA3 /* ZLAdjustSlider.swift */,
 				E410177825305C73004C4952 /* ZLFilter.swift */,
@@ -430,6 +439,7 @@
 				E4C911D224E2884E0061DA40 /* ZLPhotoPreviewSheet.swift in Sources */,
 				E46EA7D824F79F1C00033853 /* ZLClipImageViewController.swift in Sources */,
 				E4C911E024E2ACE20061DA40 /* ZLPhotoManager.swift in Sources */,
+				FD5210052FE23A9A00027B9C /* UIApplication+ZLPhotoBrowser.swift in Sources */,
 				E4CF57F024EA923C00BEBFC6 /* ZLLanguageDefine.swift in Sources */,
 				FD24655828E2A96200C15B20 /* UIView+ZLPhotoBrowser.swift in Sources */,
 				E4943ABB255A652A00C29B3A /* CGFloat+ZLPhotoBrowser.swift in Sources */,
@@ -440,6 +450,7 @@
 				FDB34114280D0D70008F20B3 /* ZLPhotoUIConfiguration.swift in Sources */,
 				E466804724FB76C50011E332 /* ZLEditVideoViewController.swift in Sources */,
 				E4D06916254C0F7F002278C4 /* ZLTextStickerView.swift in Sources */,
+				FDAA00012E95051200000001 /* ZLTextStickerContentView.swift in Sources */,
 				E462466624ECD93B00EF6C57 /* ZLAlbumListCell.swift in Sources */,
 				E4CF57EC24EA63BA00BEBFC6 /* ZLProgressHUD.swift in Sources */,
 				FD047622276B6C8500A93FA3 /* ZLEditToolCells.swift in Sources */,
@@ -482,6 +493,7 @@
 				FDA54B8B2876D8CA0077F4FA /* UIFont+ZLPhotoBrowser.swift in Sources */,
 				E49BD1F724E3CD9E005D7DFB /* ZLThumbnailPhotoCell.swift in Sources */,
 				FD74F6DD29345E4100B7916A /* ZLBaseStickerView.swift in Sources */,
+				FDA0000A2E000001000A0001 /* ZLStickerGestureCoordinator.swift in Sources */,
 				E4D06913254C06EB002278C4 /* ZLInputTextViewController.swift in Sources */,
 				E492ABED24E5454E005E1BD5 /* ZLProgressView.swift in Sources */,
 				E462466A24ED06C700EF6C57 /* ZLThumbnailViewController.swift in Sources */,
@@ -644,6 +656,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -679,6 +692,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

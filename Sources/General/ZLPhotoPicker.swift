@@ -27,6 +27,7 @@
 import UIKit
 import Photos
 
+@MainActor
 public class ZLPhotoPicker: NSObject {
     private var arrSelectedModels: [ZLPhotoModel] = []
     
@@ -57,7 +58,7 @@ public class ZLPhotoPicker: NSObject {
     @objc public var cancelBlock: (() -> Void)?
     
     deinit {
-        zlLoggerInDebug("ZLPhotoPicker deinit")
+        zl_debugPrint("ZLPhotoPicker deinit")
     }
     
     @objc override public init() {
@@ -128,7 +129,7 @@ public class ZLPhotoPicker: NSObject {
             self.cancel()
         }
         
-        ps.showPreview(sender: sender)
+        ps.show(animate: animate, sender: sender)
         previewSheet = ps
     }
     
@@ -260,14 +261,20 @@ public class ZLPhotoPicker: NSObject {
             hud.hide()
             
             func call() {
-                self?.selectImageBlock?(sucModels, isOriginal)
-                if !errorAssets.isEmpty {
-                    self?.selectImageRequestErrorBlock?(errorAssets, errorIndexs)
+                let picker = self
+                nonisolated(unsafe) let models = sucModels
+                let errAssets = errorAssets
+                let errIndexs = errorIndexs
+                MainActor.assumeIsolated {
+                    picker?.selectImageBlock?(models, isOriginal)
+                    if !errAssets.isEmpty {
+                        picker?.selectImageRequestErrorBlock?(errAssets, errIndexs)
+                    }
                 }
             }
             
-            if let vc = viewController {
-                vc.dismiss(animated: true) {
+            if let viewController {
+                viewController.dismiss(animated: true) {
                     call()
                 }
             } else {
@@ -292,7 +299,7 @@ public class ZLPhotoPicker: NSObject {
                 
                 sucCount += 1
                 
-                if let image = image {
+                if let image {
                     let isEdited = m.editImage != nil && !config.saveNewImageAfterEdit
                     let model = ZLResultModel(
                         asset: asset ?? m.asset,
@@ -325,7 +332,7 @@ public class ZLPhotoPicker: NSObject {
 // MARK: Methods for SwiftUI
 
 public extension ZLPhotoPicker {
-    @available(iOS, introduced: 13.0, message: "Only available for SwiftUI")
+    @available(iOS, introduced: 15.0, message: "Only available for SwiftUI")
     func showPhotoLibraryForSwiftUI() -> ZLImageNavController {
         let nav: ZLImageNavController
         if ZLPhotoUIConfiguration.default().style == .embedAlbumList {

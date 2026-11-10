@@ -74,6 +74,11 @@
 "depthEffect" = "لَوحَة";
 "livePhotos" = "صور حية";
 "animated" = "متحرك";
+"longExposures" = "تعريض ضوئي طويل";
+"raw" = "RAW";
+"cinematicVideos" = "سينمائي";
+"spatialMedia" = "مكاني";
+"screenRecordings" = "تسجيلات الشاشة";
 "myPhotoStream" = "دفق الصور الخاص بي";
 
 "noTitleAlbumListPlaceholder" = "جميع الصور";

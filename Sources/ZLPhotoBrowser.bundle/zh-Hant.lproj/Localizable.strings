@@ -74,6 +74,11 @@
 "depthEffect" = "人像";
 "livePhotos" = "Live Photos";
 "animated" = "動圖";
+"longExposures" = "長曝光";
+"raw" = "RAW";
+"cinematicVideos" = "電影效果";
+"spatialMedia" = "空間";
+"screenRecordings" = "錄屏";
 "myPhotoStream" = "我的照片流";
 
 "noTitleAlbumListPlaceholder" = "所有照片";

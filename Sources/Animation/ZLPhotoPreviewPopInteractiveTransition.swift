@@ -269,7 +269,7 @@ class ZLPhotoPreviewPopInteractiveTransition: UIPercentDrivenInteractiveTransiti
             if toVC.showCameraCell {
                 diff = -1
             }
-            if #available(iOS 14.0, *), toVC.showAddPhotoCell {
+            if toVC.showAddPhotoCell {
                 diff -= 1
             }
         }
@@ -288,7 +288,7 @@ class ZLPhotoPreviewPopInteractiveTransition: UIPercentDrivenInteractiveTransiti
         
         var toFrame: CGRect?
         
-        if let toIndex = toIndex, let toCell = toVC.collectionView.cellForItem(at: IndexPath(row: toIndex, section: 0)) {
+        if let toIndex, let toCell = toVC.collectionView.cellForItem(at: IndexPath(row: toIndex, section: 0)) {
             toFrame = toVC.collectionView.convert(toCell.frame, to: transitionContext.containerView)
         }
         

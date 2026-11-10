@@ -30,6 +30,8 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
 
 ### Features
 - [x] Support SwiftUI.
+- [x] Support iPad multi-window.
+- [x] Support iPhone Duo.
 - [x] Portrait and landscape.
 - [x] Two framework style.
 - [x] Support page loading.
@@ -53,9 +55,10 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
 > If you have good needs and suggestions in use, or encounter any bugs, please create an issue and I will reply in time.
  
 ### Requirements
- * iOS 10.0
- * Swift 5.x
- * Xcode 14.x
+|version|iOS|Xcode|
+|---|---|---|
+|>=6.0.0|15.0|27|
+|<6.0.0|10.0|26|
  
 ### Usage
  - Preview selection
@@ -93,22 +96,26 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
 ### Change Log
 > [More logs](https://github.com/longitachi/ZLPhotoBrowser/blob/master/CHANGELOG.md)
 ```
+● 6.0.0
+  Add:
+    Adapted UI for iPhone Duo. Updated APIs to iOS 15.0.
+● 5.0.0
+  Add:
+    Optimized UI for iPad multitasking and custom window sizes.
+    Updated partial APIs for iOS 26 and iOS 27 compatibility.
+    Added parameter to control whether camera dismisses when app enters background.
+    Added `supportLandscape` attribute; `enableWideCameras` now defaults to true.
+    Added `thumbVCAllowPanToDismiss` property.
+    Significantly optimized sticker and doodling editing experience.
+    Updated album filtering logic to display more system albums.
+  Fix:
+    Fixed incorrect selection limit prompt when only videos are allowed. #1048
+    Fixed transparent PNG images rendered with a white background. #1045
+    Fixed selection state not syncing after deselecting in preview. #1042
 ● 4.7.4
   Add:
     Supports editing multiple videos.
     Change the license from MIT to Apache-2.0.
-● 4.7.3
-  Fix:
-    Fixed the issue where the eraser position was displayed incorrectly when editing pictures.
-● 4.7.2
-  Add:
-    Improved video editing experience:
-      1. Added a shadow area mask for a clearer view of the currently selected video clip.
-      2. Added a feature to display the duration of the currently selected clip.
-    The ZLImagePreviewController interface supports disabling the pull-down return gesture.
-    Change the permission of ZLPhotoPreviewSheet to private.
-  Fix:
-    Fixed a bug where the UI of the thumbnail interface might display an error when the permission is "limited".
 ...
 ```
 
@@ -164,7 +171,7 @@ Rebuild with --use-xcframeworks to create an xcframework bundle instead.` [Click
 
 #### Swift Package Manager
 1. Select File > Add Packages. Enter https://github.com/longitachi/ZLPhotoBrowser.git in the "Choose Package Repository" dialog.
-2. In the next page, specify the version resolving rule as "Up to Next Major" with "4.7.4" as its earliest version.
+2. In the next page, specify the version resolving rule as "Up to Next Major" with "6.0.0" as its earliest version.
 3. After Xcode checking out the source and resolving the version, you can choose the "ZLPhotoBrowser" library and add it to your app target.
 
 ### Support

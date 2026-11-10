@@ -2,6 +2,31 @@
 
 -----
 
+## [6.0.0](https://github.com/longitachi/ZLPhotoBrowser/releases/tag/6.0.0) (2026-10-19)
+### Add
+* Adapted UI for iPhone Duo. Updated APIs to iOS 15.0.
+
+---
+
+## [5.0.0](https://github.com/longitachi/ZLPhotoBrowser/releases/tag/5.0.0) (2026-06-25)
+### Add
+* Optimized UI for iPad multitasking and custom window sizes for a smoother experience.
+* Updated partial APIs for iOS 26 and iOS 27 compatibility; Demo now supports iPad multi-window.
+* Added a new parameter to control whether the camera is dismissed when the app enters the background. [#1052](https://github.com/longitachi/ZLPhotoBrowser/issues/1052)
+* Added `supportLandscape` attribute to control whether landscape mode is supported. [#1050](https://github.com/longitachi/ZLPhotoBrowser/issues/1050)
+* The default value for `enableWideCameras` (wide-angle lens) has been changed to `true`. [#1050](https://github.com/longitachi/ZLPhotoBrowser/issues/1050)
+* Added `thumbVCAllowPanToDismiss` property to control whether the thumbnail interface allows swiping back from the edge.
+* Significantly optimized the sticker editing experience; text stickers now display sharper when enlarged with reduced jagged edges.
+* Optimized the doodling effect for smoother curves; improved eraser effect.
+* Updated album filtering logic to display more system albums. [#1055](https://github.com/longitachi/ZLPhotoBrowser/issues/1055)
+
+### Fix
+* Fixed incorrect selection limit prompt when only videos are allowed to be selected. [#1048](https://github.com/longitachi/ZLPhotoBrowser/issues/1048)
+* Fixed transparent PNG images being rendered with a white background. [#1045](https://github.com/longitachi/ZLPhotoBrowser/issues/1045) via [#1046](https://github.com/longitachi/ZLPhotoBrowser/pull/1046) @tac-han
+* Fixed selection state not syncing back to thumbnail list and preview after deselecting in preview. [#1042](https://github.com/longitachi/ZLPhotoBrowser/issues/1042)
+
+---
+
 ## [4.7.4](https://github.com/longitachi/ZLPhotoBrowser/releases/tag/4.7.4) (2026-01-23)
 ### Add:
 * Supports editing multiple videos.

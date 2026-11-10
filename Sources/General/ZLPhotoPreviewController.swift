@@ -34,6 +34,23 @@ class ZLPhotoPreviewController: UIViewController {
     
     static let previewVCScrollNotification = Notification.Name("previewVCScrollNotification")
     
+    // Camera-only mode: preview the in-memory photo without creating a PHAsset.
+    private final class CameraPhoto {
+        let image: UIImage
+        let byteCount: Int
+        var editedImage: UIImage?
+        var editModel: ZLEditImageModel?
+        var isSelected = true
+
+        init(image: UIImage, byteCount: Int) {
+            self.image = image
+            self.byteCount = byteCount
+        }
+    }
+
+    private var cameraPhoto: CameraPhoto?
+    var cameraPhotoDoneBlock: ((UIImage?, Bool) -> Void)?
+
     var arrDataSources: [ZLPhotoModel]
     
     var currentIndex: Int
@@ -52,6 +69,7 @@ class ZLPhotoPreviewController: UIViewController {
             view.contentInsetAdjustmentBehavior = .never
         }
         
+        ZLLocalImagePreviewCell.zl.register(view)
         ZLPhotoPreviewCell.zl.register(view)
         ZLGifPreviewCell.zl.register(view)
         ZLLivePhotoPreviewCell.zl.register(view)
@@ -203,6 +221,15 @@ class ZLPhotoPreviewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    init(cameraImage: UIImage, byteCount: Int) {
+        cameraPhoto = CameraPhoto(image: cameraImage, byteCount: byteCount)
+        arrDataSources = []
+        showBottomViewAndSelectBtn = true
+        currentIndex = 0
+        indexBeforOrientationChanged = 0
+        super.init(nibName: nil, bundle: nil)
+    }
+
     @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -377,7 +404,7 @@ class ZLPhotoPreviewController: UIViewController {
             bottomView.addSubview(bottomBlurView!)
         }
         
-        if uiConfig.showSelectedPhotoPreview {
+        if uiConfig.showSelectedPhotoPreview, cameraPhoto == nil {
             let selModels = (navigationController as? ZLImageNavController)?.arrSelectedModels ?? []
             selPhotoPreview = ZLPhotoPreviewSelectedView(selModels: selModels, currentShowModel: arrDataSources[currentIndex])
             selPhotoPreview?.selectBlock = { [weak self] model in
@@ -502,6 +529,16 @@ class ZLPhotoPreviewController: UIViewController {
         }
         
         let config = ZLPhotoConfiguration.default()
+        if let photo = cameraPhoto {
+            selectBtn.isHidden = !config.showSelectBtnWhenSingleSelect && config.maxSelectCount == 1
+            selectBtn.isSelected = photo.isSelected
+            doneBtn.setTitle(localLanguageTextValue(.done), for: .normal)
+            editBtn.isHidden = !config.allowEditImage
+            originalBtn.isHidden = !(config.allowSelectOriginal && config.allowSelectImage)
+            refreshOriginalLabelText()
+            refreshBottomViewFrame()
+            return
+        }
         let currentModel = arrDataSources[currentIndex]
         
         if (!config.showSelectBtnWhenSingleSelect && config.maxSelectCount == 1) {
@@ -569,6 +606,12 @@ class ZLPhotoPreviewController: UIViewController {
             return
         }
         
+        if let photo = cameraPhoto {
+            originalLabel.isHidden = !photo.isSelected
+            let size = ByteCountFormatter.string(fromByteCount: Int64(photo.byteCount), countStyle: .binary).replacingOccurrences(of: " ", with: "")
+            originalLabel.text = localLanguageTextValue(.originalTotalSize) + " \(size)"
+            return
+        }
         let selectModels = (navigationController as? ZLImageNavController)?.arrSelectedModels ?? []
         if selectModels.isEmpty {
             originalLabel.isHidden = true
@@ -608,6 +651,11 @@ class ZLPhotoPreviewController: UIViewController {
     }
     
     @objc private func selectBtnClick() {
+        if let photo = cameraPhoto {
+            photo.isSelected.toggle()
+            resetSubviewStatus()
+            return
+        }
         guard let nav = navigationController as? ZLImageNavController else {
             zlLoggerInDebug("Navigation controller is null")
             return
@@ -647,6 +695,21 @@ class ZLPhotoPreviewController: UIViewController {
     }
     
     @objc private func editBtnClick() {
+        if let photo = cameraPhoto {
+            ZLEditImageViewController.showEditImageVC(parentVC: self, image: photo.image, editModel: photo.editModel) { [weak self] image, editModel in
+                guard let self = self else { return }
+                photo.editedImage = image
+                photo.editModel = editModel
+                photo.isSelected = true
+                self.collectionView.reloadData()
+                self.resetSubviewStatus()
+                let config = ZLPhotoConfiguration.default()
+                if config.maxSelectCount == 1, !config.showSelectBtnWhenSingleSelect {
+                    self.doneBtnClick()
+                }
+            }
+            return
+        }
         let config = ZLPhotoConfiguration.default()
         let uiConfig = ZLPhotoUIConfiguration.default()
         
@@ -695,6 +758,13 @@ class ZLPhotoPreviewController: UIViewController {
         
         let nav = (navigationController as? ZLImageNavController)
         nav?.isSelectedOriginal = originalBtn.isSelected
+        if let photo = cameraPhoto {
+            if originalBtn.isSelected {
+                photo.isSelected = true
+            }
+            resetSubviewStatus()
+            return
+        }
         
         if nav?.arrSelectedModels.isEmpty == true, originalBtn.isSelected {
             selectBtnClick()
@@ -725,6 +795,13 @@ class ZLPhotoPreviewController: UIViewController {
     }
     
     @objc private func doneBtnClick() {
+        if let photo = cameraPhoto {
+            // Consume the callback before dismissal to prevent a second tap returning twice.
+            let completion = cameraPhotoDoneBlock
+            cameraPhotoDoneBlock = nil
+            completion?(photo.isSelected ? (photo.editedImage ?? photo.image) : nil, originalBtn.isSelected)
+            return
+        }
         guard let nav = navigationController as? ZLImageNavController else {
             zlLoggerInDebug("Navigation controller is null")
             return
@@ -891,6 +968,7 @@ extension ZLPhotoPreviewController: UINavigationControllerDelegate {
 
 extension ZLPhotoPreviewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard cameraPhoto == nil else { return }
         guard scrollView == collectionView else {
             return
         }
@@ -965,10 +1043,16 @@ extension ZLPhotoPreviewController: UICollectionViewDataSource, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return arrDataSources.count
+        return cameraPhoto == nil ? arrDataSources.count : 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if let photo = cameraPhoto {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ZLLocalImagePreviewCell.zl.identifier, for: indexPath) as! ZLLocalImagePreviewCell
+            cell.image = photo.editedImage ?? photo.image
+            cell.singleTapBlock = { [weak self] in self?.tapPreviewCell() }
+            return cell
+        }
         let config = ZLPhotoConfiguration.default()
         let model = arrDataSources[indexPath.row]
         

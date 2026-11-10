@@ -80,3 +80,29 @@ Diagnostic static self-check: optional/released controllers are logged safely; a
 closures use weak controller references; no new file storage, shared mutable state, UI mutation or per-frame logging.
 Both framework archives and host build must pass before handing over. Functional resolution remains pending runtime logs.
 Temporary logs will be removed or made switchable after the user confirms the fix.
+
+
+## Log-confirmed fix camfix-20261110b
+
+User-provided true/false traces show the exact ownership failure. In memory mode, previewDismiss.request
+is sent while the navigation controller still presents ZLEditImageViewController. That request dismisses the editor.
+Its completion then calls camera.dismiss while the camera still presents the preview navigation controller,
+so that request dismisses the preview instead of the camera. manager.memoryResult fires with the camera still attached.
+The asset path returns successfully after its asynchronous processing; this failure does not require an iOS 27-specific fix.
+
+The full editor now returns in-memory preview results only after its own dismissal completes.
+The existing preview-dismiss → camera-dismiss → result sequence therefore targets the intended controllers.
+The crop-only editor follows the same rule when used for in-memory camera preview; asset previews keep their prior ordering.
+No arbitrary delay or extra dismiss attempt is introduced. Diagnostic logs remain until runtime confirmation.
+
+The true trace also records album.save.completion at 522827.492, before preview.viewDidAppear at 522827.580.
+This proves persistence preceded preview in that run; the later visibility reported in the Photos UI is not explained by this trace.
+
+Re-test false with actual edits and with no edits, false direct preview confirmation, cancellation/back/retake,
+and true as regression. Where used, also test the crop-only editor. Success requires camera.cameraDismiss.completion
+with attached=false and presenter=nil, followed by one manager.memoryResult and return to the original web page.
+Compare build=camfix-20261110b to ensure the fixed artifact is loaded. All runtime re-tests remain pending user verification.
+
+Static self-check: the mode property is read-only; empty selection/result handling is unchanged; callback consumption still prevents
+double return; dismissal completion captures the callback independently of controller lifetime; controller diagnostics remain weak;
+all UI transitions remain on the existing main-thread flow; no new storage, synchronization, layout work or image copies.

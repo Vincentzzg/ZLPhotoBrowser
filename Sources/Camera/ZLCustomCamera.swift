@@ -1412,7 +1412,7 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
     }
     
     private func previewCameraPhoto(_ image: UIImage, byteCount: Int) {
-        zl_cameraTrace("camera.memoryPreview.entry", self, "build=camdiag-20261110a saveToAlbum=\(saveToAlbum)")
+        zl_cameraTrace("camera.memoryPreview.entry", self, "build=camfix-20261110b saveToAlbum=\(saveToAlbum)")
         let preview = ZLPhotoPreviewController(cameraImage: image, byteCount: byteCount)
         let nav = ZLImageNavController(rootViewController: preview)
         nav.isSelectedOriginal = true
@@ -1430,8 +1430,8 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
                 }
                 let completion = self.photoPreviewDoneBlock
                 zl_cameraTrace("camera.cameraDismiss.request", self, "hasCallback=\(completion != nil)")
-                self.dismiss(animated: true) {
-                    zl_cameraTrace("camera.cameraDismiss.completion")
+                self.dismiss(animated: true) { [weak self] in
+                    zl_cameraTrace("camera.cameraDismiss.completion", self)
                     completion?(image, isOriginal)
                 }
             }
@@ -1447,7 +1447,7 @@ extension ZLCustomCamera: AVCapturePhotoCaptureDelegate {
 
     private func handlePhotoOutputData(_ data: Data?, isError: Bool) {
         ZLMainAsync {
-            zl_cameraTrace("camera.photoOutput.entry", self, "build=camdiag-20261110a saveToAlbum=\(self.saveToAlbum) preview=\(ZLPhotoConfiguration.default().afterTakePhotoDidPreview) hasData=\(data != nil) error=\(isError)")
+            zl_cameraTrace("camera.photoOutput.entry", self, "build=camfix-20261110b saveToAlbum=\(self.saveToAlbum) preview=\(ZLPhotoConfiguration.default().afterTakePhotoDidPreview) hasData=\(data != nil) error=\(isError)")
             defer {
                 self.isTakingPicture = false
                 self.isCapturePending = false

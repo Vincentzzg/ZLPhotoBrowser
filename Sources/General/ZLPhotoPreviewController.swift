@@ -49,6 +49,8 @@ class ZLPhotoPreviewController: UIViewController {
     }
 
     private var cameraPhoto: CameraPhoto?
+    // In-memory results complete synchronously, so their consumer must wait for the editor to dismiss.
+    var isInMemoryCameraPreview: Bool { cameraPhoto != nil }
     var cameraPhotoDoneBlock: ((UIImage?, Bool) -> Void)?
 
     var arrDataSources: [ZLPhotoModel]
